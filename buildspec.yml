@@ -13,6 +13,9 @@ phases:
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - PWD=$(pwd) 
+      - PWDUTILS=$(pwd)
+      - curl -Lo ./snyk "https://github.com/snyk/snyk/releases/download/v1.210.0/snyk-linux"
+      - chmod -R +x ./snyk
       - echo Setting CodeCommit Credentials
       - git config --global credential.helper '!aws codecommit credential-helper $@'
       - git config --global credential.UseHttpPath true
@@ -27,7 +30,12 @@ phases:
       - echo Building the Docker image...
       
       - docker build -t $REPOSITORY_URI:latest .
+      - $PWDUTILS/snyk auth 6c7ed4a9-60b8-4cf3-8893-691552c432e0
+      - $PWDUTILS/snyk test --docker $REPOSITORY_URI:latest
+      - $PWDUTILS/snyk monitor --docker $REPOSITORY_URI:latest
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      
+      
   post_build:
     commands:
       - echo Build completed on `date`
