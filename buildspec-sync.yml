@@ -15,7 +15,8 @@ phases:
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - PWD=$(pwd) 
       - PWDUTILS=$(pwd)
-      
+      - curl -Lo ./snyk "https://github.com/snyk/snyk/releases/download/v1.210.0/snyk-linux"
+      - chmod -R +x ./snyk
       - echo Setting CodeCommit Credentials
       - git config --global credential.helper '!aws codecommit credential-helper $@'
       - git config --global credential.UseHttpPath true
