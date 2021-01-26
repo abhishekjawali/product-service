@@ -32,7 +32,7 @@ phases:
       
       - docker build -t $REPOSITORY_URI:latest .
       - $PWDUTILS/snyk auth 6c7ed4a9-60b8-4cf3-8893-691552c432e0
-      - $PWDUTILS/snyk test --docker $REPOSITORY_URI:latest
+      - $PWDUTILS/snyk test --dry-run --docker $REPOSITORY_URI:latest
       - $PWDUTILS/snyk monitor --docker $REPOSITORY_URI:latest
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
       
