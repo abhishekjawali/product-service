@@ -5,6 +5,7 @@ env:
     HOST: prod/sonar:HOST
     Organization: prod/sonar:Organization
     Project: prod/sonar:Project
+    Dockerpass: docker:dockerpass
 phases:
   install:
     runtime-versions:
@@ -15,7 +16,7 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws --version
-      - docker login -u abhishekjv -p namaskara 
+      - docker login -u abhishekjv -p $Dockerpass 
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - REPOSITORY_URI=$(aws ecr describe-repositories --repository-name product-service --query=repositories[0].repositoryUri --output=text)
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
