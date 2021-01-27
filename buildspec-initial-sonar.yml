@@ -1,22 +1,29 @@
 version: 0.2
+env:
+  secrets-manager:
+    LOGIN: prod/sonar:sonartoken
+    HOST: prod/sonar:HOST
+    Organization: prod/sonar:Organization
+    Project: prod/sonar:Project
+    Dockerpass: docker:dockerpass
 phases:
   install:
     runtime-versions:
       docker: 18
+      java: openjdk11
       
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
       - aws --version
-      - docker login -u abhishekjv -p namaskara 
+      - docker login -u abhishekjv -p $Dockerpass 
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - REPOSITORY_URI=$(aws ecr describe-repositories --repository-name product-service --query=repositories[0].repositoryUri --output=text)
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - PWD=$(pwd) 
       - PWDUTILS=$(pwd)
-      - curl -Lo ./snyk "https://github.com/snyk/snyk/releases/download/v1.210.0/snyk-linux"
-      - chmod -R +x ./snyk
+      
       - echo Setting CodeCommit Credentials
       - git config --global credential.helper '!aws codecommit credential-helper $@'
       - git config --global credential.UseHttpPath true
@@ -24,16 +31,31 @@ phases:
       - git remote add origin https://git-codecommit.us-west-2.amazonaws.com/v1/repos/product-service
       - git fetch
       - git checkout -f "$CODEBUILD_RESOLVED_SOURCE_VERSION"
+      
+      - apt-get update
+      - apt-get install -y jq
+      - wget http://www-eu.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
+      - tar xzf apache-maven-3.5.4-bin.tar.gz
+      - ln -s apache-maven-3.5.4 maven
+      - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
+      - unzip ./sonar-scanner-cli-3.3.0.1492-linux.zip
+      
+      - export PATH=$PATH:$PWD/apache-maven-3.5.4/bin:$PWD/sonar-scanner-3.3.0.1492-linux/bin/
      
   build:
     commands:
+      - mvn test     
+      - mvn sonar:sonar -Dsonar.login=$LOGIN -Dsonar.host.url=$HOST -Dsonar.projectKey=$Project -Dsonar.organization=$Organization
+      - sleep 5
+      - curl https://sonarcloud.io/api/qualitygates/project_status?projectKey=$Project >result.json
+      - cat result.json
+      - if [ $(jq -r '.projectStatus.status' result.json) = ERROR ] ; then $CODEBUILD_BUILD_SUCCEEDING -eq 0 ;fi
+    
       - echo Build started on `date`
       - echo Building the Docker image...
       
       - docker build -t $REPOSITORY_URI:latest .
-      - $PWDUTILS/snyk auth 6c7ed4a9-60b8-4cf3-8893-691552c432e0
-      - $PWDUTILS/snyk test --dev --docker $REPOSITORY_URI:latest
-      - $PWDUTILS/snyk monitor --docker $REPOSITORY_URI:latest
+      
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
       
       
