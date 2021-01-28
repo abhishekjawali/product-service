@@ -31,7 +31,10 @@ Resources:
             Principal:
               Service: codebuild.amazonaws.com
             Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
       Policies:
+        
         - PolicyName: root
           PolicyDocument:
             Version: 2012-10-17
