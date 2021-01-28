@@ -6,7 +6,6 @@ env:
     Organization: prod/sonar:Organization
     Project: prod/sonar:Project
     Dockerpass: docker:dockerpass
-    Snyk: snyk:snyktoken
 phases:
   install:
     runtime-versions:
@@ -24,9 +23,7 @@ phases:
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - PWD=$(pwd) 
       - PWDUTILS=$(pwd)
-      - echo Downloading Snyk CLI
-      - curl -Lo ./snyk "https://github.com/snyk/snyk/releases/download/v1.210.0/snyk-linux"
-      - chmod -R +x ./snyk
+      
       - echo Setting CodeCommit Credentials
       - git config --global credential.helper '!aws codecommit credential-helper $@'
       - git config --global credential.UseHttpPath true
@@ -47,29 +44,27 @@ phases:
      
   build:
     commands:
+      - echo Beginning Sonar Scanning. 
       - mvn test     
       - mvn sonar:sonar -Dsonar.login=$LOGIN -Dsonar.host.url=$HOST -Dsonar.projectKey=$Project -Dsonar.organization=$Organization
       - sleep 5
+      - echo Sonar Scanning Completed. Checking the result. 
       - curl https://sonarcloud.io/api/qualitygates/project_status?projectKey=$Project >result.json
       - cat result.json
       - if [ $(jq -r '.projectStatus.status' result.json) = ERROR ] ; then $CODEBUILD_BUILD_SUCCEEDING -eq 0 ;fi
+      - echo No major issues found in sonar scanning. Proceeding with build and deployment. 
     
-      - echo Build started on `date`
+  
       - echo Building the Docker image...
       
-      - docker build --build-arg snyk_auth_token=$Snyk -t $REPOSITORY_URI:latest .
-      
-      - echo Checking Vulnerability in Snyk
-      - $PWDUTILS/snyk auth $Snyk
-      - $PWDUTILS/snyk test --dev --docker $REPOSITORY_URI:latest
-      - $PWDUTILS/snyk monitor --docker $REPOSITORY_URI:latest
+      - docker build -t $REPOSITORY_URI:latest .
       
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
       
       
   post_build:
     commands:
-      - echo Build completed on `date`
+      
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
