@@ -1,7 +1,7 @@
 ## Reference app to showcase code transformation using Amazon Q Developer
 
 ### Requirements
- - Java 8
+ - Java 17
  - Maven
  - Postgres
 
