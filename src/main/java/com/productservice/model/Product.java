@@ -7,6 +7,12 @@ import jakarta.persistence.Id;
 @Entity(name = "products")
 public class Product {
 
+	public Product(Integer productId, String productName, Integer productPrice) {
+		this.productId = productId;
+		this.productName = productName;
+		this.productPrice = productPrice;
+	}
+
 	@Id
 	@Column(name = "product_id")
 	private Integer productId;

@@ -5,6 +5,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.productservice.repository.ProductRepository;
@@ -23,9 +26,11 @@ public class ProductServiceImpl implements ProductService {
         return productRepo.findByProductId(productId);
     }
 
+   
     @Override
-    public List<Product> getAllProducts() {
-        List<Product> products = (List<Product>) productRepo.findAll();
-        return products;
+    public Page<Product> getAllProducts(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        return productRepo.findAll(pageable);
     }
+
 }
