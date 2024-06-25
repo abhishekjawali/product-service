@@ -20,13 +20,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getProduct(Integer productId) {
-        logger.info("Retrieving product with id: {}", productId);
         return productRepo.findByProductId(productId);
     }
 
     @Override
     public List<Product> getAllProducts() {
-        logger.info("Retrieving all products");
         List<Product> products = (List<Product>) productRepo.findAll();
         return products;
     }
