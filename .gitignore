@@ -1,4 +1,6 @@
 HELP.md
+transformation-plan.md
+summary/
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**
