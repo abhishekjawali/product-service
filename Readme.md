@@ -3,8 +3,11 @@
 ### Requirements
  - Java 8
  - Maven
+ - Postgres
 
 ### Setup
+ - Update the Postgres database details in application.properties. 
+
 ```
 mvn clean install
 java -jar target/product-service.jar
