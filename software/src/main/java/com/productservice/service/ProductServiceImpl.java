@@ -18,19 +18,25 @@ public class ProductServiceImpl implements ProductService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
+    public ProductServiceImpl(ProductRepository productRepo) {
+        this.productRepo = productRepo;
+    }
+
+
     @Autowired
     private ProductRepository productRepo;
 
     @Override
     public Product getProduct(Integer productId) {
-        return productRepo.findByProductId(productId);
+        var product = productRepo.findById(productId);
+        return product.get();
     }
 
    
     @Override
-    public Page<Product> getAllProducts(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return productRepo.findAll(pageable);
+    public List<Product> getAllProducts() {
+        var productList = productRepo.findAllProducts();
+        return productList.get();
     }
 
 }

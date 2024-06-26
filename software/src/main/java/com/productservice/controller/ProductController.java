@@ -36,8 +36,9 @@ public class ProductController {
     public ResponseEntity<List<Product>> getProducts(
         @RequestParam(defaultValue = "0") int pageNumber,
         @RequestParam(defaultValue = "10") int pageSize) {
-            Page<Product> products = productService.getAllProducts(pageNumber, pageSize);
-            List<Product> productList = products.getContent();
+            //Page<Product> products = productService.getAllProducts(pageNumber, pageSize);
+            //List<Product> productList = products.getContent();
+            List<Product> productList = productService.getAllProducts();
             return new ResponseEntity<>(productList, HttpStatus.OK);
     }
 

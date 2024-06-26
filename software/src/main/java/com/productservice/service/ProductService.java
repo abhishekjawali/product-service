@@ -10,6 +10,6 @@ public interface ProductService {
 
 	public Product getProduct(Integer productId);
 
-	public Page<Product> getAllProducts(int pageNumber, int pageSize);
+	public List<Product> getAllProducts();
 
 }
