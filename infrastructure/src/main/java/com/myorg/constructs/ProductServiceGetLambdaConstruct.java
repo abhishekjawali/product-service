@@ -56,6 +56,7 @@ public class ProductServiceGetLambdaConstruct extends Construct {
 
         Resource productResource = restApi.getRoot().addResource("products");
         productResource.addMethod("POST", new LambdaIntegration(postLambda));
+        productResource.addMethod("GET", new LambdaIntegration(getLambda));
 
         Resource productResourceById = productResource.addResource("{id}");
         productResourceById.addMethod("GET", new LambdaIntegration(getLambda));

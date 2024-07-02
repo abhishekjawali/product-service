@@ -40,13 +40,14 @@ public class ProductRepository  {
     }
 
     public Optional<List<Product>> findAllProducts() {
+        logger.info("BEGIN:findAllProducts");
         var connection = getDatabaseConnection();
         List<Product> productList = new ArrayList<Product>();
         try {
             var statement = connection.prepareStatement("Select * from products");
             var result = statement.executeQuery();
 
-            if(result.next()){
+            while(result.next()){
                 var product = new Product();
                 product.setProductId(result.getInt("product_id"));
                 product.setProductName(result.getString("product_name"));
@@ -61,11 +62,14 @@ public class ProductRepository  {
             logger.error(errorMsg, sqlException);
             throw new RuntimeException(errorMsg, sqlException);
         }
+        logger.info("Product List size", productList.size());
+        
+        logger.info("END:findAllProducts");
         return Optional.of(productList);
     }
 
     public Optional<Product> findById(Integer productId) {
-        logger.info("Inside find yb ID with the below ID {}", productId);
+        logger.info("Inside find by ID with ID {}", productId);
         
         var connection = getDatabaseConnection();
         try {
